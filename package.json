@@ -1,0 +1,21 @@
+{
+  "author": "Dennis Torres <djtorres0@gmail.com>",
+  "dependencies": {
+    "lodash": "^3.10.1"
+  },
+  "description": "",
+  "devDependencies": {
+    "async": "^1.4.2",
+    "eslint": "^0.24.1",
+    "livedb": "^0.5.13",
+    "racer": "^0.5.14",
+    "tape": "^4.0.3"
+  },
+  "license": "Unlicense",
+  "main": "index.js",
+  "name": "racer-store-hooks",
+  "scripts": {
+    "test": "node test"
+  },
+  "version": "1.0.0"
+}
