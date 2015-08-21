@@ -3,7 +3,7 @@
   "dependencies": {
     "lodash": "^3.10.1"
   },
-  "description": "",
+  "description": "Racer store event hooks.",
   "devDependencies": {
     "async": "^1.4.2",
     "eslint": "^0.24.1",
