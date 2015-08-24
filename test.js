@@ -12,7 +12,7 @@ test('lib', function (t) {
 });
 
 test('change', {timeout: 1000}, function (t) {
-  t.plan(205);
+  t.plan(224);
 
   var backend = livedb.client({
     db: livedb.memory()
@@ -67,6 +67,13 @@ test('change', {timeout: 1000}, function (t) {
     items: [{a: 3}, {c: 1}]
   };
 
+  var thing7 = {
+    foo: 2,
+    id: 'id',
+    stuff: {a: {foo: 'b++!'}},
+    items: [{a: 3}, {c: 1}]
+  };
+
   var pass = 0;
 
   hooks.on('change', 'things.id', function (next, prev, snapshot) {
@@ -106,6 +113,12 @@ test('change', {timeout: 1000}, function (t) {
       t.deepEqual(next.stuff.a.foo, thing6.stuff.a.foo);
       t.deepEqual(prev.stuff.a.foo, thing5.stuff.a.foo);
       t.deepEqual(snapshot, thing6);
+    }
+
+    if (pass === 7) {
+      t.equal(next.foo, thing7.foo);
+      t.equal(typeof prev, 'undefined');
+      t.deepEqual(snapshot, thing7);
     }
   });
 
@@ -153,6 +166,13 @@ test('change', {timeout: 1000}, function (t) {
       t.deepEqual(prev.stuff.a.foo, thing5.stuff.a.foo);
       t.deepEqual(snapshot, thing6);
     }
+
+    if (pass === 7) {
+      t.equal(id, thing7.id);
+      t.equal(next.foo, thing7.foo);
+      t.equal(typeof prev, 'undefined');
+      t.deepEqual(snapshot, thing7);
+    }
   });
 
   hooks.on('change', '*.id', function (coll, next, prev, snapshot) {
@@ -198,6 +218,13 @@ test('change', {timeout: 1000}, function (t) {
       t.deepEqual(next.stuff.a.foo, thing6.stuff.a.foo);
       t.deepEqual(prev.stuff.a.foo, thing5.stuff.a.foo);
       t.deepEqual(snapshot, thing6);
+    }
+
+    if (pass === 7) {
+      t.equal(coll, 'things');
+      t.equal(next.foo, thing7.foo);
+      t.equal(typeof prev, 'undefined');
+      t.deepEqual(snapshot, thing7);
     }
   });
 
@@ -367,6 +394,17 @@ test('change', {timeout: 1000}, function (t) {
     }
   });
 
+  hooks.on('change', 'things.*.foo', function (id, next, prev, snapshot) {
+    t.ok(true);
+
+    if (pass === 7) {
+      t.equal(id, thing7.id);
+      t.equal(next, thing7.foo);
+      t.equal(typeof prev, 'undefined');
+      t.deepEqual(snapshot, thing7);
+    }
+  });
+
   pass = 1;
   model.add('things', thing1, function (err) {
     t.error(err);
@@ -404,6 +442,12 @@ test('change', {timeout: 1000}, function (t) {
           setTimeout(function () {
             pass = 6;
             $thing.stringRemove('stuff.a.foo', 3, 2, done);
+          });
+        },
+        function (done) {
+          setTimeout(function () {
+            pass = 7;
+            $thing.increment('foo', 2, done);
           });
         }
       ], function (err) {

@@ -78,8 +78,8 @@ Events.prototype.setup = function () {
         var index;
         var value;
 
-        if (op.od) {
-          _.set(oldDataTree, path, op.od);
+        if (op.od || op.oi) {
+          if (op.od) _.set(oldDataTree, path, op.od);
           if (op.oi) _.set(newDataTree, path, op.oi);
           return;
         }
