@@ -1,3 +1,1 @@
-# racer-store-hooks
-
-Racer store event hooks.
+# ShareDB Backend Hooks

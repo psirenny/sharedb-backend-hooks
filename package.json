@@ -3,7 +3,7 @@
   "dependencies": {
     "lodash": "4.2.1"
   },
-  "description": "Sharedb backend event hooks.",
+  "description": "Sharedb backend event hooks",
   "devDependencies": {
     "async": "1.5.2",
     "derby": "^0.8.3",
