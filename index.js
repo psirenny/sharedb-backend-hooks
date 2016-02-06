@@ -2,9 +2,9 @@
 
 var _ = require('lodash');
 
-function Events(store) {
+function Events(backend) {
+  this.backend = backend;
   this.hookTree = {};
-  this.store = store;
   this.setup();
 }
 
@@ -56,23 +56,25 @@ Events.prototype.setup = function () {
     });
   }
 
-  this.store.shareClient.use('after submit', function (shareReq, next) {
+  this.backend.use('after submit', function (shareReq, next) {
     next();
-    var collection = shareReq.opData.collection;
-    var documentId = shareReq.opData.docName;
+    var collection = shareReq.collection || shareReq.projection;
+    var documentId = shareReq.id;
+    var documentData = shareReq.snapshot.data;
     var basePath = [collection, documentId];
     var oldDataTree;
     var newDataTree;
     var fnResults = {};
+    documentData.id = shareReq.id;
 
-    if (shareReq.opData.create) {
+    if (shareReq.op.create) {
       newDataTree = {};
-      _.set(newDataTree, basePath, shareReq.snapshot.data);
-    } else if (!shareReq.opData.del) {
+      _.set(newDataTree, basePath, documentData);
+    } else if (!shareReq.op.del) {
       oldDataTree = {};
       newDataTree = {};
 
-      shareReq.opData.op.forEach(function (op) {
+      shareReq.op.op.forEach(function (op) {
         var p = op.p;
         var path = basePath.concat(op.p);
         var index;
@@ -85,7 +87,7 @@ Events.prototype.setup = function () {
         }
 
         if (op.na) {
-          value = _.get(shareReq.snapshot.data, op.p);
+          value = _.get(documentData, op.p);
           _.set(oldDataTree, path, value - op.na);
           _.set(newDataTree, path, value);
           return;
@@ -100,7 +102,7 @@ Events.prototype.setup = function () {
         if (op.si) {
           p.pop();
           index = path.pop();
-          value = _.get(shareReq.snapshot.data, p);
+          value = _.get(documentData, p);
           _.set(oldDataTree, path, value.substring(0, index) + value.substr(index + op.si.length));
           _.set(newDataTree, path, value);
           return;
@@ -109,7 +111,7 @@ Events.prototype.setup = function () {
         if (op.sd) {
           p.pop();
           index = path.pop();
-          value = _.get(shareReq.snapshot.data, p);
+          value = _.get(documentData, p);
           _.set(oldDataTree, path, value.substring(0, index) + op.sd + value.substr(index));
           _.set(newDataTree, path, value);
           return;
@@ -124,7 +126,7 @@ Events.prototype.setup = function () {
       if (fnResult.documentId) params.push(fnResult.documentId);
       if (fnResult.captureCollection[0].length === 2) params = params.concat(fnResult.captureCollection[0]);
       else params.push(fnResult.captureCollection);
-      params.push(shareReq.snapshot.data);
+      params.push(documentData);
       fnResult.fn.apply(fnResult.fn, params);
     });
   });

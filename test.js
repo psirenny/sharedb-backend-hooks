@@ -1,8 +1,8 @@
 'use strict';
 
+var _ = require('lodash');
 var async = require('async');
 var lib = require('./');
-var livedb = require('livedb');
 var racer = require('racer');
 var test = require('tape');
 
@@ -14,19 +14,13 @@ test('lib', function (t) {
 test('change', {timeout: 1000}, function (t) {
   t.plan(224);
 
-  var backend = livedb.client({
-    db: livedb.memory()
-  });
+  var backend = racer.createBackend();
 
-  var store = racer.createStore({
-    backend: backend
-  });
-
-  var model = store.createModel({
+  var model = backend.createModel({
     fetchOnly: true
   });
 
-  var hooks = lib(store);
+  var hooks = lib(backend);
 
   var thing1 = {
     id: 'id',
@@ -406,7 +400,7 @@ test('change', {timeout: 1000}, function (t) {
   });
 
   pass = 1;
-  model.add('things', thing1, function (err) {
+  model.add('things', _.cloneDeep(thing1), function (err) {
     t.error(err);
     var $thing = model.at('things.id');
 
@@ -417,7 +411,7 @@ test('change', {timeout: 1000}, function (t) {
         function (done) {
           setTimeout(function () {
             pass = 2;
-            $thing.setDiffDeep('', thing2, done);
+            $thing.setDiffDeep('', _.cloneDeep(thing2), done);
           });
         },
         function (done) {
